@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>QuantumBody Replay Lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="mark">QB</span><div><p class="eyebrow">PHYSICS SANDBOX / REPLAY LAB</p><h1>QuantumBody</h1></div></div>
+      <label class="load-button">Load replay<input id="file" type="file" accept=".json,application/json"></label>
+    </header>
+    <section class="stage-card">
+      <div class="stage-head"><div><p class="eyebrow">SIMULATION VIEW</p><h2 id="scene-name">No replay loaded</h2></div><div class="live-tag"><i></i><span>DETERMINISTIC REPLAY</span></div></div>
+      <div class="canvas-wrap"><canvas id="view" aria-label="Isometric physics simulation replay"></canvas><div id="empty" class="empty"><div class="empty-icon">◈</div><strong>Load a QuantumBody trajectory</strong><span>Generate one with <code>--trajectory web/trajectory.json</code></span></div></div>
+      <div class="timeline"><button id="play" class="play" disabled aria-label="Play">▶</button><input id="scrub" type="range" min="0" max="0" value="0" disabled><span id="time">0.00s</span></div>
+    </section>
+    <section class="metrics">
+      <article><span class="metric-label">BODIES</span><strong id="body-count">—</strong><small>rigid bodies in replay</small></article>
+      <article><span class="metric-label">FRAMES</span><strong id="frame-count">—</strong><small>recorded simulation states</small></article>
+      <article><span class="metric-label">FIXED STEP</span><strong id="fixed-step">—</strong><small>simulation time increment</small></article>
+      <article><span class="metric-label">SCENE</span><strong id="scene-kind">—</strong><small>seeded C++ scene</small></article>
+    </section>
+    <footer>Built with the QuantumBody C++20 prototype · Isometric replay viewer · No external JavaScript libraries</footer>
+  </main>
+  <script src="viewer.js"></script>
+</body>
+</html>
