@@ -2,7 +2,7 @@
 
 **A small, dependency-free 3D rigid-body physics sandbox in modern C++.** QuantumBody is an educational engine prototype built around a fixed-step simulation loop, oriented-box and sphere collision detection, a sequential-impulse contact solver, reproducible scenes, and a lightweight replay viewer.
 
-> **Status:** prototype / milestone M1–M4 foundation. The CPU rigid-body path, CLI scenes, deterministic replay, timing output, and verification checks are implemented. CUDA, fluids, cloth, joints, continuous collision detection, and a full real-time renderer are future milestones; benchmark numbers are machine-specific and are not checked into the repository.
+> **Status:** prototype / milestone M1–M4 foundation. The CPU rigid-body path, CLI scenes, seeded replay, per-step timing output, and a small verification suite are implemented. CUDA, fluids, cloth, joints, continuous collision detection, and a full real-time renderer remain future work. A three-run local timing sample is recorded in [docs/benchmark.md](docs/benchmark.md); it is a reproducible command run, not a controlled cross-machine performance claim.
 
 ## What works today
 
@@ -64,7 +64,7 @@ docs/                 Architecture, algorithms, scope, and roadmap
 
 ## Physics model and current limits
 
-See [docs/architecture.md](docs/architecture.md) for the update pipeline and [docs/physics.md](docs/physics.md) for formulas and solver conventions. Contacts currently use one support-point midpoint per body pair. This is compact and useful for a prototype, but less stable than a clipped multi-point manifold for wide box stacks. The broad phase is a one-axis sweep and can degrade in highly overlapping scenes. Shapes are limited to spheres and boxes. CCD, articulated joints, sleeping, SIMD, GPU compute, fluid/cloth solvers, and live rendering are not implemented yet.
+See [docs/architecture.md](docs/architecture.md) for the update pipeline, [docs/physics.md](docs/physics.md) for formulas and solver conventions, and [docs/benchmark.md](docs/benchmark.md) for one measured local run. Contacts currently use one support-point midpoint per body pair. This is compact and useful for a prototype, but less stable than a clipped multi-point manifold for wide box stacks. Sphere centers fully inside boxes use a simplified penetration fallback. The broad phase is a one-axis sweep and can degrade in highly overlapping scenes. Shapes are limited to spheres and boxes. CCD, articulated joints, sleeping, SIMD, GPU compute, fluid/cloth solvers, and live rendering are not implemented yet.
 
 ## Roadmap
 

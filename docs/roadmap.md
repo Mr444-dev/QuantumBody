@@ -12,7 +12,7 @@ This roadmap narrows the original QuantumBody/SILNIK3D proposal into independent
 | M5 | XPBD cloth and collision coupling | Planned |
 | M6 | SPH fluids with a neighbor grid | Planned |
 | M7 | CCD and improved contact manifolds | Planned |
-| M8 | Repeatable benchmark harness and profiler visualization | CSV and percentiles exist; visualization planned |
+| M8 | Repeatable benchmark harness and profiler visualization | CLI CSV and per-step percentiles exist; a three-run local sample is documented, but there is no controlled cross-machine harness or performance gate; visualization planned |
 | M9 | Optional CUDA/Vulkan compute backend | Planned; requires suitable compiler/toolkit and device |
 | M10 | Property/fuzz tests and sanitizer CI | Planned beyond the small current checks |
 | M11 | Real-time renderer and interactive debug controls | Replay viewer exists; live renderer planned |

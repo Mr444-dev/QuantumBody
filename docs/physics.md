@@ -40,6 +40,7 @@ Relative contact velocity is `vB + ωB × rB - vA - ωA × rA`. The solver compu
 
 - No continuous collision detection: a sufficiently fast body can tunnel through thin shapes. `failure-lab` exposes this limitation.
 - One approximate contact per overlapping pair: box stacks may wobble or sink under load.
+- For a sphere whose center is inside an OBB, the fallback selects a nearby face direction but currently reports only the sphere radius as penetration. Deep containment can therefore remain under-corrected; this path has no dedicated regression test.
 - No warm starting, sleeping, joints, gyroscopic term, or mass-ratio conditioning.
 - Position correction uses a contact velocity bias, not a separate split-impulse position pass.
 - The broad phase is single-threaded and may approach quadratic work when many AABBs overlap.
