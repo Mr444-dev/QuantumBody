@@ -2,7 +2,7 @@
 
 **Niewielki, niezależny od bibliotek silnik fizyki brył sztywnych 3D w nowoczesnym C++.** To prototyp edukacyjny z ustalonym krokiem symulacji, kolizjami kul i obróconych pudeł, iteracyjnym solverem impulsowym, powtarzalnymi scenami oraz prostym odtwarzaczem przebiegów.
 
-> **Stan:** prototyp, podstawa milestone’ów M1–M4. Działają ścieżka fizyki CPU, sceny CLI, zapis przebiegu z ustalonym ziarnem, pomiary czasu każdego kroku i mały zestaw testów. CUDA, płyny, tkanina, przeguby, CCD i pełny renderer czasu rzeczywistego pozostają kolejnymi etapami. Trzy lokalne pomiary opisuje [docs/benchmark.md](docs/benchmark.md); nie są porównaniem wydajności między komputerami.
+> **Stan:** prototyp, podstawa milestone’ów M1–M4. Działają ścieżka fizyki CPU, sceny CLI, zapis przebiegu z ustalonym ziarnem, pomiary czasu każdego kroku i mały zestaw testów. CUDA, płyny, tkanina, przeguby, CCD i pełny renderer czasu rzeczywistego pozostają kolejnymi etapami. Osiem lokalnych uruchomień benchmarku opisuje [docs/benchmark.md](docs/benchmark.md); nie jest to kontrolowane porównanie wydajności między komputerami.
 
 ## Działające elementy
 
@@ -47,7 +47,7 @@ Otwórz `http://localhost:8000/web/` i wczytaj `trajectory.json`. Podgląd nie w
 
 ## Zakres i ograniczenia
 
-Architekturę opisuje [docs/architecture.md](docs/architecture.md), model matematyczny [docs/physics.md](docs/physics.md), a pomiar lokalny [docs/benchmark.md](docs/benchmark.md). Para brył dostaje obecnie pojedynczy punkt kontaktu wyznaczony z punktów podparcia. To upraszcza implementację, ale daje słabsze stosy pudeł niż wielopunktowy manifold z clippingiem. Kula umieszczona głęboko wewnątrz pudełka korzysta z uproszczonej korekty penetracji. Sweep-and-prune może zwalniać, gdy wiele brył mocno na siebie nachodzi. Dostępne są kule i pudełka; CCD, przeguby, usypianie obiektów, SIMD, obliczenia GPU, płyny, tkanina i podgląd na żywo nie są jeszcze zaimplementowane.
+Architekturę opisuje [docs/architecture.md](docs/architecture.md), model matematyczny [docs/physics.md](docs/physics.md), a pomiar lokalny [docs/benchmark.md](docs/benchmark.md). Para brył dostaje obecnie pojedynczy punkt kontaktu wyznaczony z punktów podparcia. To upraszcza implementację, ale daje słabsze stosy pudeł niż wielopunktowy manifold z clippingiem. Kula umieszczona wewnątrz pudełka korzysta z normalnej najbliższej ściany i głębokości równej promieniowi plus odległość do tej ściany. Bufory broadphase i solvera są zachowywane między krokami; test alokacji potwierdza brak alokacji sterty po rozgrzaniu dla stabilnego obciążenia. Sweep-and-prune może zwalniać, gdy wiele brył mocno na siebie nachodzi. Dostępne są kule i pudełka; CCD, przeguby, usypianie obiektów, SIMD, obliczenia GPU, płyny, tkanina i podgląd na żywo nie są jeszcze zaimplementowane.
 
 ## Następne etapy
 

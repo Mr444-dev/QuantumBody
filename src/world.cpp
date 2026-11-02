@@ -9,15 +9,6 @@
 namespace qb {
 namespace {
 
-struct Aabb { Vec3 min, max; };
-struct Proxy { std::uint32_t id; Aabb bounds; };
-struct SolverContact {
-    Contact contact;
-    double normalImpulse{};
-    Vec3 tangentImpulse{};
-    double bounceSpeed{};
-};
-
 Vec3 boxAxis(const RigidBody& body, int axis) {
     Vec3 local{};
     if (axis == 0) local.x = 1.0;
@@ -43,7 +34,7 @@ Vec3 support(const RigidBody& body, const Vec3& direction) {
     return point;
 }
 
-Aabb bounds(const RigidBody& body) {
+detail::Aabb bounds(const RigidBody& body) {
     if (const auto* sphere = std::get_if<Sphere>(&body.shape)) {
         const Vec3 r{sphere->radius, sphere->radius, sphere->radius};
         return {body.position - r, body.position + r};
@@ -56,7 +47,7 @@ Aabb bounds(const RigidBody& body) {
     return {body.position - r, body.position + r};
 }
 
-bool overlaps(const Aabb& a, const Aabb& b) {
+bool overlaps(const detail::Aabb& a, const detail::Aabb& b) {
     return a.min.x <= b.max.x && a.max.x >= b.min.x &&
            a.min.y <= b.max.y && a.max.y >= b.min.y &&
            a.min.z <= b.max.z && a.max.z >= b.min.z;
@@ -84,7 +75,11 @@ bool sphereBox(const RigidBody& sphereBody, const RigidBody& boxBody, Contact& o
     Vec3 towardBox = closestWorld - sphereBody.position;
     double distance = towardBox.length();
     if (distance > radius) return false;
-    if (distance <= kEpsilon) {
+    double penetration = radius - distance;
+    const bool centerInside = local.x >= -ext.x && local.x <= ext.x &&
+                              local.y >= -ext.y && local.y <= ext.y &&
+                              local.z >= -ext.z && local.z <= ext.z;
+    if (distance <= kEpsilon && centerInside) {
         const Vec3 gap = ext - abs(local);
         int axis = gap.x < gap.y ? (gap.x < gap.z ? 0 : 2) : (gap.y < gap.z ? 1 : 2);
         const double sign = axis == 0 ? (local.x >= 0.0 ? 1.0 : -1.0) :
@@ -95,9 +90,11 @@ bool sphereBox(const RigidBody& sphereBody, const RigidBody& boxBody, Contact& o
         if (axis == 2) outward.z = sign;
         towardBox = -boxBody.orientation.rotate(outward);
         distance = 0.0;
+        const double faceDistance = axis == 0 ? gap.x : (axis == 1 ? gap.y : gap.z);
+        penetration = radius + faceDistance;
     }
     const Vec3 normal = towardBox.normalized(-boxAxis(boxBody, 1));
-    out = {sphereBody.id, boxBody.id, closestWorld, normal, radius - distance};
+    out = {sphereBody.id, boxBody.id, closestWorld, normal, penetration};
     return true;
 }
 
@@ -238,36 +235,35 @@ void World::step(double dt) {
         body.force = {}; body.torque = {};
     }
 
-    std::vector<Proxy> proxies;
-    proxies.reserve(bodies_.size());
-    for (const auto& body : bodies_) proxies.push_back({body.id, bounds(body)});
-    std::sort(proxies.begin(), proxies.end(), [](const Proxy& a, const Proxy& b) {
+    proxies_.clear();
+    proxies_.reserve(bodies_.size());
+    for (const auto& body : bodies_) proxies_.push_back({body.id, bounds(body)});
+    std::sort(proxies_.begin(), proxies_.end(), [](const detail::Proxy& a, const detail::Proxy& b) {
         if (a.bounds.min.x != b.bounds.min.x) return a.bounds.min.x < b.bounds.min.x;
         return a.id < b.id;
     });
-    std::vector<std::pair<std::uint32_t, std::uint32_t>> pairs;
-    for (std::size_t i = 0; i < proxies.size(); ++i) {
-        const auto& a = proxies[i];
-        for (std::size_t j = i + 1; j < proxies.size() && proxies[j].bounds.min.x <= a.bounds.max.x; ++j) {
-            const auto& b = proxies[j];
+    broadphasePairs_.clear();
+    for (std::size_t i = 0; i < proxies_.size(); ++i) {
+        const auto& a = proxies_[i];
+        for (std::size_t j = i + 1; j < proxies_.size() && proxies_[j].bounds.min.x <= a.bounds.max.x; ++j) {
+            const auto& b = proxies_[j];
             if (bodies_[a.id].isStatic && bodies_[b.id].isStatic) continue;
-            if (overlaps(a.bounds, b.bounds)) pairs.emplace_back(std::min(a.id,b.id), std::max(a.id,b.id));
+            if (overlaps(a.bounds, b.bounds)) broadphasePairs_.emplace_back(std::min(a.id,b.id), std::max(a.id,b.id));
         }
     }
-    stats_.broadphaseCandidates += pairs.size();
-    std::vector<SolverContact> contacts;
-    contacts.reserve(pairs.size());
-    for (const auto [aId, bId] : pairs) {
+    stats_.broadphaseCandidates += broadphasePairs_.size();
+    contacts_.clear();
+    for (const auto [aId, bId] : broadphasePairs_) {
         Contact c;
         if (!collide(bodies_[aId], bodies_[bId], c)) continue;
         const Vec3 ra = c.point - bodies_[aId].position, rb = c.point - bodies_[bId].position;
         const double vn = dot(pointVelocity(bodies_[bId], rb) - pointVelocity(bodies_[aId], ra), c.normal);
         const double e = std::min(bodies_[aId].restitution, bodies_[bId].restitution);
-        contacts.push_back({c, 0.0, {}, vn < -1.0 ? -e * vn : 0.0});
+        contacts_.push_back({c, 0.0, {}, vn < -1.0 ? -e * vn : 0.0});
     }
-    stats_.contacts += contacts.size();
+    stats_.contacts += contacts_.size();
     for (std::uint32_t iteration = 0; iteration < settings_.solverIterations; ++iteration) {
-        for (auto& sc : contacts) {
+        for (auto& sc : contacts_) {
             auto& a = bodies_[sc.contact.a]; auto& b = bodies_[sc.contact.b];
             const Vec3 ra = sc.contact.point - a.position, rb = sc.contact.point - b.position;
             const Vec3 relative = pointVelocity(b, rb) - pointVelocity(a, ra);

@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -33,6 +34,17 @@ struct RigidBody {
 };
 
 struct Contact { std::uint32_t a{}, b{}; Vec3 point{}, normal{}; double penetration{}; };
+
+namespace detail {
+struct Aabb { Vec3 min, max; };
+struct Proxy { std::uint32_t id; Aabb bounds; };
+struct SolverContact {
+    Contact contact;
+    double normalImpulse{};
+    Vec3 tangentImpulse{};
+    double bounceSpeed{};
+};
+} // namespace detail
 
 struct WorldSettings {
     Vec3 gravity{0.0, -9.81, 0.0};
@@ -65,6 +77,10 @@ public:
 private:
     WorldSettings settings_;
     std::vector<RigidBody> bodies_;
+    // Scratch storage is retained across steps and grows to the workload's high-water mark.
+    std::vector<detail::Proxy> proxies_;
+    std::vector<std::pair<std::uint32_t, std::uint32_t>> broadphasePairs_;
+    std::vector<detail::SolverContact> contacts_;
     StepStats stats_;
 };
 

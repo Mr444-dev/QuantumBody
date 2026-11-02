@@ -2,7 +2,9 @@
 
 **A small, dependency-free 3D rigid-body physics sandbox in modern C++.** QuantumBody is an educational engine prototype built around a fixed-step simulation loop, oriented-box and sphere collision detection, a sequential-impulse contact solver, reproducible scenes, and a lightweight replay viewer.
 
-> **Status:** prototype / milestone M1–M4 foundation. The CPU rigid-body path, CLI scenes, seeded replay, per-step timing output, and a small verification suite are implemented. CUDA, fluids, cloth, joints, continuous collision detection, and a full real-time renderer remain future work. A three-run local timing sample is recorded in [docs/benchmark.md](docs/benchmark.md); it is a reproducible command run, not a controlled cross-machine performance claim.
+![Offline replay viewer showing the first frame of the seeded 501-body swarm replay](docs/screenshots/quantumbody-viewer.png)
+
+> **Status:** prototype / milestone M1–M4 foundation. The CPU rigid-body path, CLI scenes, seeded replay, per-step timing output, and a small verification suite are implemented. CUDA, fluids, cloth, joints, continuous collision detection, and a full real-time renderer remain future work. An eight-run local timing sample is recorded in [docs/benchmark.md](docs/benchmark.md); it is a reproducible command run, not a controlled cross-machine performance claim.
 
 ## What works today
 
@@ -13,7 +15,8 @@
 - Iterative sequential impulses for normal response and Coulomb friction, including angular impulse response and penetration bias.
 - Deterministic built-in `stack`, `swarm`, and `drop` scenes, plus a `failure-lab` stress scene.
 - JSON trajectory export, CSV per-step metrics, and an offline isometric replay viewer.
-- CTest checks for free-fall behavior, repeatability, floor contacts, and invalid time steps.
+- Seven individually named CTest suites cover core integration, determinism, sphere/floor and box/floor contacts, box-stack stability, deep sphere-inside-OBB recovery, and zero allocations after warm-up.
+- `World::step()` retains broad-phase proxy, candidate-pair, and solver-contact buffers between calls. A replacement global C++ allocation probe confirms zero `operator new` calls for a warmed, stable workload.
 - GitHub Actions build and test workflow on Windows and Ubuntu.
 
 ## Build
@@ -42,14 +45,17 @@ The program prints one JSON metrics record to stdout. `--csv FILE` writes step t
 
 ```powershell
 .\build\Release\quantumbody.exe --scene stack --steps 600 --record-every 3 --trajectory web\trajectory.json
+.\build\Release\quantumbody.exe --scene swarm --count 500 --seed 42 --steps 900 --record-every 30 --trajectory web\replay-501-seed42.json
 python -m http.server 8000
 ```
 
 Open `http://localhost:8000/web/` and load `trajectory.json` with the file picker. The viewer also accepts `?file=trajectory.json` when the replay sits next to `index.html`.
 
+The screenshot above uses the first frame of the checked-in [501-body seed-42 replay](web/replay-501-seed42.json), which records 31 states across 7.5 simulated seconds. Serve the repository root and open `http://localhost:8000/web/?file=replay-501-seed42.json` to inspect it.
+
 ## Example output
 
-The JSON summary includes the seed, body count, simulated duration, measured wall duration, steps/second, p50/p95/p99 step time, and aggregate broad-phase/contact counts. Times depend on compiler, build mode, and hardware. Run multiple trials before drawing performance conclusions.
+The JSON summary includes the seed, body count, simulated duration, sum of measured step durations, steps/second, p50/p95/p99 step time, and aggregate broad-phase/contact counts. Times depend on compiler, build mode, and hardware. Run multiple trials before drawing performance conclusions.
 
 ## Repository map
 
@@ -64,7 +70,7 @@ docs/                 Architecture, algorithms, scope, and roadmap
 
 ## Physics model and current limits
 
-See [docs/architecture.md](docs/architecture.md) for the update pipeline, [docs/physics.md](docs/physics.md) for formulas and solver conventions, and [docs/benchmark.md](docs/benchmark.md) for one measured local run. Contacts currently use one support-point midpoint per body pair. This is compact and useful for a prototype, but less stable than a clipped multi-point manifold for wide box stacks. Sphere centers fully inside boxes use a simplified penetration fallback. The broad phase is a one-axis sweep and can degrade in highly overlapping scenes. Shapes are limited to spheres and boxes. CCD, articulated joints, sleeping, SIMD, GPU compute, fluid/cloth solvers, and live rendering are not implemented yet.
+See [docs/architecture.md](docs/architecture.md) for the update pipeline, [docs/physics.md](docs/physics.md) for formulas and solver conventions, and [docs/benchmark.md](docs/benchmark.md) for the measured 501-body MSVC Release sample. Contacts currently use one support-point midpoint per body pair. This is compact and useful for a prototype, but less stable than a clipped multi-point manifold for wide box stacks. Sphere centers fully inside boxes use the nearest-face normal and radius-plus-face-distance penetration fallback. The broad phase is a one-axis sweep and can degrade in highly overlapping scenes. Shapes are limited to spheres and boxes. CCD, articulated joints, sleeping, SIMD, GPU compute, fluid/cloth solvers, and live rendering are not implemented yet.
 
 ## Roadmap
 
