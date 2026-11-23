@@ -58,6 +58,6 @@ Architekturę opisuje [docs/architecture.md](docs/architecture.md), model matema
 5. Interaktywny renderer debugowania i profiler.
 6. CCD, testy skrajnych przypadków, sanitizery i powtarzalna metodologia benchmarków.
 
-## Licencja
+## Prawa autorskie i ponowne użycie
 
-Oryginalny kod projektu autorstwa Michała Rusinka (Mr444-dev) jest objęty licencją MIT — szczegóły w pliku [LICENSE](LICENSE).
+Oryginalny kod projektu autorstwa Michała Rusinka (Mr444-dev) nie jest udostępniony na licencji otwartej; wszystkie prawa są zastrzeżone. Szczegóły w pliku [LICENSE](LICENSE).
