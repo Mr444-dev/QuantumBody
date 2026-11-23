@@ -83,7 +83,7 @@ See [docs/architecture.md](docs/architecture.md) for the update pipeline, [docs/
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Original project source code by Michał Rusinek (Mr444-dev) is licensed under MIT. See [LICENSE](LICENSE).
 
 ---
 

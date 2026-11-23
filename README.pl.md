@@ -60,4 +60,4 @@ Architekturę opisuje [docs/architecture.md](docs/architecture.md), model matema
 
 ## Licencja
 
-MIT — szczegóły w pliku [LICENSE](LICENSE).
+Oryginalny kod projektu autorstwa Michała Rusinka (Mr444-dev) jest objęty licencją MIT — szczegóły w pliku [LICENSE](LICENSE).
