@@ -81,9 +81,9 @@ See [docs/architecture.md](docs/architecture.md) for the update pipeline, [docs/
 5. Replace replay-only visualization with an interactive real-time debug renderer and profiler.
 6. Add CCD, stress/failure cases, sanitizer jobs, and recorded benchmark methodology.
 
-## License
+## Copyright and reuse
 
-Original project source code by Michał Rusinek (Mr444-dev) is licensed under MIT. See [LICENSE](LICENSE).
+Original project source code by Michał Rusinek (Mr444-dev) is not offered under an open-source license; all rights are reserved. See [LICENSE](LICENSE).
 
 ---
 
